@@ -5,7 +5,7 @@ set -e
 export ETCD_ENDPOINTS=
 
 # Specify the version (vX.Y.Z) of Kubernetes assets to deploy
-export K8S_VER=v1.1.2
+export K8S_VER=v1.1.3
 
 # The CIDR network to use for pod IPs.
 # Each pod launched in the cluster will be assigned an IP out of this range.
@@ -58,6 +58,7 @@ function init_flannel {
         IFS=',' read -ra ES <<< "$ETCD_ENDPOINTS"
         for ETCD in "${ES[@]}"; do
             echo "Trying: $ETCD"
+            ETCD=$(echo $ETCD | tr -d "\r")
             if [ -n "$(curl --silent "$ETCD/v2/machines")" ]; then
                 local ACTIVE_ETCD=$ETCD
                 break
