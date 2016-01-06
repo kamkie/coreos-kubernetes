@@ -147,7 +147,6 @@ Documentation=https://github.com/GoogleCloudPlatform/kubernetes,http://kubernete
 After=kubelet.service
 
 [Service]
-EnvironmentFile=/etc/sysconfig/kubernetes-config
 ExecStartPre=-/usr/bin/docker kill kube-proxy
 ExecStartPre=-/usr/bin/docker rm kube-proxy
 ExecStartPre=/usr/bin/docker pull gcr.io/google_containers/hyperkube:$K8S_VER
