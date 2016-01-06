@@ -151,10 +151,12 @@ spec:
     - /hyperkube
     - apiserver
     - --bind-address=0.0.0.0
+    - --insecure_bind_address=0.0.0.0
     - --etcd-servers=${ETCD_ENDPOINTS}
     - --allow-privileged=true
     - --service-cluster-ip-range=${SERVICE_IP_RANGE}
     - --secure-port=443
+    - --insecure-port=8080
     - --advertise-address=${ADVERTISE_IP}
     - --admission-control=NamespaceLifecycle,LimitRanger,SecurityContextDeny,ServiceAccount,ResourceQuota
     - --tls-cert-file=/etc/kubernetes/ssl/apiserver.pem
@@ -391,7 +393,8 @@ EOF
                     },
                     {
                         "args": [
-                            "-domain=cluster.local"
+                            "-domain=cluster.local",
+                            "-kube_master_url=http://${ADVERTISE_IP}:8080"
                         ],
                         "image": "gcr.io/google_containers/kube2sky:1.11",
                         "name": "kube2sky",

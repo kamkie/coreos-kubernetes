@@ -136,6 +136,40 @@ spec:
 EOF
     }
 
+        local TEMPLATE=/etc/systemd/system/kube-proxy.service
+    [ -f $TEMPLATE ] || {
+        echo "TEMPLATE: $TEMPLATE"
+        mkdir -p $(dirname $TEMPLATE)
+        cat << EOF > $TEMPLATE
+[Unit]
+Description=Kubernetes Proxy
+Documentation=https://github.com/GoogleCloudPlatform/kubernetes,http://kubernetes.io/v1.0/docs/admin/kube-proxy.html
+Requires=setup-network-environment.service
+After=setup-network-environment.service
+
+[Service]
+EnvironmentFile=/etc/sysconfig/kubernetes-config
+ExecStartPre=-/usr/bin/docker kill kube-proxy
+ExecStartPre=-/usr/bin/docker rm kube-proxy
+ExecStartPre=/usr/bin/docker pull gcr.io/google_containers/hyperkube:$K8S_VER
+ExecStart=/usr/bin/docker run \
+  --net=host \
+  --name kube-proxy \
+  gcr.io/google_containers/hyperkube:$K8S_VER \
+  -- \
+  /hyperkube \
+  proxy \
+  --master=${CONTROLLER_ENDPOINT} \
+  --kubeconfig=/etc/kubernetes/worker-kubeconfig.yaml\
+  --proxy-mode=iptables
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+EOF
+    }
+
     local TEMPLATE=/etc/flannel/options.env
     [ -f $TEMPLATE ] || {
         echo "TEMPLATE: $TEMPLATE"
@@ -176,4 +210,5 @@ systemctl stop update-engine; systemctl mask update-engine
 
 systemctl daemon-reload
 systemctl enable kubelet; systemctl start kubelet
+systemctl enable kube-proxy; systemctl start kube-proxy
 
