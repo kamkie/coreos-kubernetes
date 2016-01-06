@@ -8,3 +8,5 @@
 
 #$etcd_count=1
 #$etcd_vm_memory=512
+
+#$cpus_number = 1

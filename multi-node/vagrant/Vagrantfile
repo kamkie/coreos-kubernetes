@@ -15,6 +15,7 @@ $worker_count = 1
 $worker_vm_memory = 1024
 $etcd_count = 1
 $etcd_vm_memory = 512
+$cpus_number = 1
 
 CONFIG = File.expand_path("config.rb")
 if File.exist?(CONFIG)
@@ -131,13 +132,13 @@ Vagrant.configure("2") do |config|
 
   ["vmware_fusion", "vmware_workstation"].each do |vmware|
     config.vm.provider vmware do |v|
-      v.vmx['numvcpus'] = 1
+      v.vmx['numvcpus'] = $cpus_number
       v.gui = false
     end
   end
 
   config.vm.provider :virtualbox do |vb|
-    vb.cpus = 1
+    vb.cpus = $cpus_number
     vb.gui = false
   end
 
