@@ -144,8 +144,7 @@ EOF
 [Unit]
 Description=Kubernetes Proxy
 Documentation=https://github.com/GoogleCloudPlatform/kubernetes,http://kubernetes.io/v1.0/docs/admin/kube-proxy.html
-Requires=setup-network-environment.service
-After=setup-network-environment.service
+After=kubelet.service
 
 [Service]
 EnvironmentFile=/etc/sysconfig/kubernetes-config
@@ -155,8 +154,8 @@ ExecStartPre=/usr/bin/docker pull gcr.io/google_containers/hyperkube:$K8S_VER
 ExecStart=/usr/bin/docker run \
   --net=host \
   --name kube-proxy \
+  --privileged=true \
   gcr.io/google_containers/hyperkube:$K8S_VER \
-  -- \
   /hyperkube \
   proxy \
   --master=${CONTROLLER_ENDPOINT} \
