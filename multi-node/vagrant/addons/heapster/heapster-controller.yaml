@@ -25,4 +25,4 @@ spec:
         command:
         - /heapster
         - --source=kubernetes:http://172.17.4.101:8080
-        - --sink=influxdb:http://172.17.4.201:8086
+        - --sink=influxdb:http://10.3.0.20:8086

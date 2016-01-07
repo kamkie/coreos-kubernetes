@@ -84,7 +84,7 @@ function init_templates {
 [Service]
 ExecStartPre=/usr/bin/mkdir -p /etc/kubernetes/manifests
 ExecStart=/usr/bin/kubelet \
-  --api_servers=http://127.0.0.1:8080 \
+  --api_servers=http://${ADVERTISE_IP}:8080 \
   --register-node=false \
   --allow-privileged=true \
   --config=/etc/kubernetes/manifests \
@@ -117,8 +117,7 @@ spec:
     command:
     - /hyperkube
     - proxy
-    - --master=http://127.0.0.1:8080
-    - --proxy-mode=iptables
+    - --master=http://${ADVERTISE_IP}:8080
     securityContext:
       privileged: true
     volumeMounts:
@@ -205,7 +204,7 @@ spec:
     image: gcr.io/google_containers/podmaster:1.1
     command:
     - /podmaster
-    - --etcd-servers=${ETCD_ENDPOINTS}
+    - --etcd-servers=$(echo $ETCD_ENDPOINTS | tr -d "\r")
     - --key=scheduler
     - --whoami=${ADVERTISE_IP}
     - --source-file=/src/manifests/kube-scheduler.yaml
@@ -220,7 +219,7 @@ spec:
     image: gcr.io/google_containers/podmaster:1.1
     command:
     - /podmaster
-    - --etcd-servers=${ETCD_ENDPOINTS}
+    - --etcd-servers=$(echo $ETCD_ENDPOINTS | tr -d "\r")
     - --key=controller
     - --whoami=${ADVERTISE_IP}
     - --source-file=/src/manifests/kube-controller-manager.yaml
@@ -259,7 +258,7 @@ spec:
     command:
     - /hyperkube
     - controller-manager
-    - --master=http://127.0.0.1:8080
+    - --master=http://${ADVERTISE_IP}:8080
     - --service-account-private-key-file=/etc/kubernetes/ssl/apiserver-key.pem
     - --root-ca-file=/etc/kubernetes/ssl/ca.pem
     livenessProbe:
@@ -305,7 +304,7 @@ spec:
     command:
     - /hyperkube
     - scheduler
-    - --master=http://127.0.0.1:8080
+    - --master=http://${ADVERTISE_IP}:8080
     livenessProbe:
       httpGet:
         host: 127.0.0.1

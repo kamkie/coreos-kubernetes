@@ -110,7 +110,6 @@ spec:
     - /hyperkube
     - proxy
     - --kubeconfig=/etc/kubernetes/worker-kubeconfig.yaml
-    - --proxy-mode=iptables
     - --master=$(echo $CONTROLLER_ENDPOINT | tr -d "\r")
     securityContext:
       privileged: true
