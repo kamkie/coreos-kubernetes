@@ -152,7 +152,7 @@ spec:
     - apiserver
     - --bind-address=0.0.0.0
     - --insecure_bind_address=0.0.0.0
-    - --etcd-servers=${ETCD_ENDPOINTS}
+    - --etcd-servers=$(echo $ETCD_ENDPOINTS | tr -d "\r")
     - --allow-privileged=true
     - --service-cluster-ip-range=${SERVICE_IP_RANGE}
     - --secure-port=443

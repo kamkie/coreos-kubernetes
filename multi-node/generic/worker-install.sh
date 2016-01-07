@@ -49,7 +49,7 @@ function init_templates {
 [Service]
 ExecStartPre=/usr/bin/mkdir -p /etc/kubernetes/manifests
 ExecStart=/usr/bin/kubelet \
-  --api_servers=${CONTROLLER_ENDPOINT} \
+  --api_servers=$(echo $CONTROLLER_ENDPOINT | tr -d "\r") \
   --register-node=true \
   --allow-privileged=true \
   --config=/etc/kubernetes/manifests \
@@ -109,9 +109,9 @@ spec:
     command:
     - /hyperkube
     - proxy
-    - --master=${CONTROLLER_ENDPOINT}
     - --kubeconfig=/etc/kubernetes/worker-kubeconfig.yaml
     - --proxy-mode=iptables
+    - --master=$(echo $CONTROLLER_ENDPOINT | tr -d "\r")
     securityContext:
       privileged: true
     volumeMounts:
@@ -133,38 +133,6 @@ spec:
     - name: "etc-kube-ssl"
       hostPath:
         path: "/etc/kubernetes/ssl"
-EOF
-    }
-
-        local TEMPLATE=/etc/systemd/system/kube-proxy.service
-    [ -f $TEMPLATE ] || {
-        echo "TEMPLATE: $TEMPLATE"
-        mkdir -p $(dirname $TEMPLATE)
-        cat << EOF > $TEMPLATE
-[Unit]
-Description=Kubernetes Proxy
-Documentation=https://github.com/GoogleCloudPlatform/kubernetes,http://kubernetes.io/v1.0/docs/admin/kube-proxy.html
-After=kubelet.service
-
-[Service]
-ExecStartPre=-/usr/bin/docker kill kube-proxy
-ExecStartPre=-/usr/bin/docker rm kube-proxy
-ExecStartPre=/usr/bin/docker pull gcr.io/google_containers/hyperkube:$K8S_VER
-ExecStart=/usr/bin/docker run \
-  --net=host \
-  --name kube-proxy \
-  --privileged=true \
-  gcr.io/google_containers/hyperkube:$K8S_VER \
-  /hyperkube \
-  proxy \
-  --master=${CONTROLLER_ENDPOINT} \
-  --kubeconfig=/etc/kubernetes/worker-kubeconfig.yaml\
-  --proxy-mode=iptables
-Restart=always
-RestartSec=10
-
-[Install]
-WantedBy=multi-user.target
 EOF
     }
 
@@ -208,5 +176,4 @@ systemctl stop update-engine; systemctl mask update-engine
 
 systemctl daemon-reload
 systemctl enable kubelet; systemctl start kubelet
-systemctl enable kube-proxy; systemctl start kube-proxy
 
